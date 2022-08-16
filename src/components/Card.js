@@ -4,7 +4,7 @@ const Card = ({card, onCardClick}) => (
     <div className="elements__item" onClick={() => onCardClick(card)}>
         <img className="elements__image"
              src={card.link}
-             alt='Байкал'/>
+             alt={card.name}/>
         <div className="elements__title">
             <h2 className="elements__name">{card.name}</h2>
             <div className="elements__likes-container">

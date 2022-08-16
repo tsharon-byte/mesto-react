@@ -1,14 +1,9 @@
-import React, {useState, useEffect} from "react";
+import {useState, useEffect} from "react";
 import Add from "../images/add.svg";
-import PopupWithForm from "./PopupWithForm";
-import ImagePopup from "./ImagePopup";
 import api from "../utils/api";
 import Card from "./Card";
 
-function Main({
-                  onEditProfile, onAddPlace, onEditAvatar, isEditProfilePopupOpen,
-                  isAddPlacePopupOpen, isEditAvatarPopupOpen, onClose, selectedCard, onCardClick
-              }) {
+function Main({onEditProfile, onAddPlace, onEditAvatar, onCardClick}) {
     const [userName, setUserName] = useState('');
     const [userDescription, setUserDescription] = useState('');
     const [userAvatar, setUserAvatar] = useState('');
@@ -57,32 +52,6 @@ function Main({
             <section className="elements">
                 {cards.map(item => (<Card card={item} key={item._id} onCardClick={onCardClick}/>))}
             </section>
-            <PopupWithForm name='profile' title='Редактировать профиль' isOpen={isEditProfilePopupOpen}
-                           onClose={onClose}>
-                <input className="input form__name" id="name" name="name" type="text" required minLength="2"
-                       maxLength="40" placeholder="Имя"/>
-                <span className="form__error" id="name-error"> </span>
-                <input className="input form__description" id="about" name="about" type="text" required
-                       minLength="2" maxLength="200" placeholder="Профессия"/>
-                <span className="form__error" id="about-error"> </span>
-            </PopupWithForm>
-            <PopupWithForm name='placeAdd' title='Новое место' isOpen={isAddPlacePopupOpen} onClose={onClose}>
-                <input className="input form__name" id="place-name" name="placeName" type="text"
-                       placeholder="Название места" required minLength="2" maxLength="30"/>
-                <span className="form__error" id="place-name-error"> </span>
-                <input className="input form__description" id="place-url" name="placeUrl" type="url"
-                       placeholder="URL"
-                       required/>
-                <span className="form__error" id="place-url-error"> </span>
-            </PopupWithForm>
-            <PopupWithForm name='avatarEdit' title='Обновить аватар' isOpen={isEditAvatarPopupOpen} onClose={onClose}>
-                <input className="input form__name" id="avatar" name="avatar"
-                       placeholder="URL аватара" required type="url"/>
-                <span className="form__error" id="avatar-error"> </span>
-            </PopupWithForm>
-            <PopupWithForm name='cardDelete' title='Вы уверены?'>
-            </PopupWithForm>
-            {selectedCard && <ImagePopup card={selectedCard} onClose={onClose}/>}
         </main>);
 }
 
