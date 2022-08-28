@@ -4,12 +4,12 @@ import CurrentUserContext from "../contexts/CurrentUserContext";
 
 const EditProfilePopup = memo(({isOpen, onClose, onUpdateUser}) => {
     const currentUser = useContext(CurrentUserContext);
-    const [name, setName] = useState(currentUser.name);
-    const [description, setDescription] = useState(currentUser.about);
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
     useEffect(() => {
-        setName(currentUser.name);
-        setDescription(currentUser.about);
-    }, [currentUser]);
+        setName(currentUser.name || '');
+        setDescription(currentUser.about || '');
+    }, [currentUser, isOpen]);
 
     function handleSubmit(e) {
         e.preventDefault();

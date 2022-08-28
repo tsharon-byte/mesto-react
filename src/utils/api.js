@@ -7,18 +7,24 @@ class Api {
         this._headers = headers;
         this._get = this._get.bind(this);
         this._patch = this._patch.bind(this);
+        this._post = this._post.bind(this);
+        this._put = this._put.bind(this);
+        this._delete = this._delete.bind(this);
     }
     _checkResponse(res){
-        if (res.ok) {
+        if (res && res.ok) {
             return res.json();
         }
         return Promise.reject(`Ошибка: ${res.status}`);
+    }
+    _rejectPromise(){
+        return Promise.reject(`Ошибка`);
     }
 
     _get(ep) {
         return fetch(this._baseUrl + ep, {
             headers: this._headers
-        }).then(this._checkResponse);
+        }).then(this._checkResponse).catch(this._rejectPromise);
     }
 
     _patch(ep, data) {
@@ -26,7 +32,7 @@ class Api {
             headers: this._headers,
             method: 'PATCH',
             body: JSON.stringify(data)
-        }).then(this._checkResponse);
+        }).then(this._checkResponse).catch(this._rejectPromise);
     }
 
     _post(ep, data) {
@@ -34,21 +40,21 @@ class Api {
             headers: this._headers,
             method: 'POST',
             body: JSON.stringify(data)
-        }).then(this._checkResponse);
+        }).then(this._checkResponse).catch(this._rejectPromise);
     }
 
-    _put(ep, data) {
+    _put(ep) {
         return fetch(this._baseUrl + ep, {
             headers: this._headers,
             method: 'PUT',
-        }).then(this._checkResponse);
+        }).then(this._checkResponse).catch(this._rejectPromise);
     }
 
-    _delete(ep, cardId) {
+    _delete(ep) {
         return fetch(this._baseUrl + ep, {
             headers: this._headers,
             method: 'DELETE',
-        }).then(this._checkResponse);
+        }).then(this._checkResponse).catch(this._rejectPromise);
     }
 
     getInitialCards() {

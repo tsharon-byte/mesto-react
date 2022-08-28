@@ -1,9 +1,13 @@
-import {useState, memo} from "react";
+import {useState, memo, useEffect} from "react";
 import PopupWithForm from "./PopupWithForm";
 
 const AddPlacePopup = memo(({isOpen, onClose, onSubmit}) => {
     const [name, setName] = useState('');
     const [link, setLink] = useState('');
+    useEffect(() => {
+        setName('');
+        setLink('');
+    }, [isOpen]);
     return (
         <PopupWithForm name='placeAdd' title='Новое место' isOpen={isOpen} onClose={onClose}
                        buttonText='Создать' buttonTextLoading='Создание...' onSubmit={e => {

@@ -22,30 +22,39 @@ function App() {
     const [selectedCard, setSelectedCard] = useState({});
     const [cards, setCards] = useState([]);
     const [toUpdate, setToUpdate] = useState(false);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [loadingCards, setLoadingCards] = useState(false);
     useEffect(() => {
+        setLoading(true);
         api.getUserInfo().then(user => {
-            setCurrentUser(user);
-        })
+            if (user) {
+                setCurrentUser(user);
+            }
+        }).catch(err => showError(err)).finally(() => setLoading(false));
     }, []);
     useEffect(() => {
-        api.getInitialCards().then(data => {
-            setCards(data.map(({name, link, _id, owner, likes}) => ({
-                name,
-                link,
-                _id,
-                owner,
-                likes
-            })));
-        });
+        if (currentUser._id) {
+            setLoadingCards(true);
+            api.getInitialCards().then(data => {
+                if (data) {
+                    setCards(data.map(({name, link, _id, owner, likes}) => ({
+                        name,
+                        link,
+                        _id,
+                        owner,
+                        likes
+                    })));
+                }
+            }).catch(err => showError(err)).finally(() => setLoadingCards(false));
+        }
     }, [currentUser._id, toUpdate]);
     const handleEditAvatarClick = () => setEditAvatarPopupOpen(true);
     const handleEditProfileClick = () => setEditProfilePopupOpen(true);
     const showError = (err) => {
         setError(err);
         setTimeout(() => {
-            setError(null);
+            setError('');
         }, 3000);
     }
     const handleAddPlaceClick = () => {
@@ -64,7 +73,7 @@ function App() {
     };
     const handleDeleteCard = id => {
         setLoading(true);
-        api.deleteCard(id).then(res => {
+        api.deleteCard(id).then(() => {
             closeAllPopups();
         }).catch(err => showError(err)).finally(() => {
             setLoading(false);
@@ -74,21 +83,25 @@ function App() {
     const handleUpdateAvatar = data => {
         setLoading(true);
         api.patchAvatar(data).then(res => {
-            setCurrentUser(res);
+            if (res) {
+                setCurrentUser(res);
+            }
             closeAllPopups();
         }).catch(err => showError(err)).finally(() => setLoading(false));
     }
     const handleCardLike = card => {
-        const isLiked = card.likes.some(i => i._id === currentUser._id);
+        if (card && card.likes && currentUser && currentUser._id) {
+            const isLiked = card.likes.some(i => i._id === currentUser._id);
 
-        if (!isLiked) {
-            setLoading(true);
-            api.putCardLikes(card._id).then(() =>
-                setToUpdate(!toUpdate)).finally(() => setLoading(false));
-        } else {
-            setLoading(true);
-            api.deleteCardLikes(card._id).then(() =>
-                setToUpdate(!toUpdate)).finally(() => setLoading(false));
+            if (!isLiked) {
+                setLoading(true);
+                api.putCardLikes(card._id).then(() =>
+                    setToUpdate(!toUpdate)).catch(err => showError(err)).finally(() => setLoading(false));
+            } else {
+                setLoading(true);
+                api.deleteCardLikes(card._id).then(() =>
+                    setToUpdate(!toUpdate)).catch(err => showError(err)).finally(() => setLoading(false));
+            }
         }
     };
     const handleCardDelete = card => {
@@ -114,11 +127,12 @@ function App() {
         <CurrentUserContext.Provider value={currentUser}>
             <LoadingContext.Provider value={loading}>
                 <div className="page">
-                    <Snackbar show={error !== null} error={error}/>
+                    <Snackbar show={error !== ''} error={error}/>
                     <Header/>
                     <Main onEditProfile={handleEditProfileClick} onAddPlace={handleAddPlaceClick}
                           onEditAvatar={handleEditAvatarClick} onCardClick={handleCardClick}
                           cards={cards} onCardLike={handleCardLike} onCardDelete={handleCardDelete}
+                          loadingCards={loadingCards}
                     />
                     <Footer/>
                     <EditProfilePopup isOpen={isEditProfilePopupOpen}
@@ -129,7 +143,11 @@ function App() {
                                      onClose={closeAllPopups} onUpdateAvatar={handleUpdateAvatar}/>
                     <CardDeleteConfirmationPopup isOpen={isDeleteCardOpen}
                                                  onClose={closeAllPopups}
-                                                 onSubmit={() => handleDeleteCard(selectedCard._id)}/>
+                                                 onSubmit={() => {
+                                                     if (selectedCard && selectedCard._id) {
+                                                         handleDeleteCard(selectedCard._id);
+                                                     }
+                                                 }}/>
                     <ImagePopup card={selectedCard} onClose={closeAllPopups} isOpen={isImagePopupOpen}/>
                 </div>
             </LoadingContext.Provider>
