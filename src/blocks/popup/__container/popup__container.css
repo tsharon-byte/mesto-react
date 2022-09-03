@@ -10,7 +10,6 @@
 @media (max-width: 468px) {
     .popup__container {
         margin-top: 123px;
-        width: calc(100% - 38px);
-        height: 322px;
+        width: calc(100vw - 38px);
     }
 }

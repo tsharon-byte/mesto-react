@@ -1,6 +1,9 @@
 const AVATAR_EP = '/users/me/avatar';
 const USERS_EP = '/users/me';
 const CARDS_EP = '/cards';
+const SIGN_UP_EP = 'signup';
+const SIGN_IN_EP = 'signin';
+
 class Api {
     constructor({baseUrl, headers}) {
         this._baseUrl = baseUrl;
@@ -11,19 +14,27 @@ class Api {
         this._put = this._put.bind(this);
         this._delete = this._delete.bind(this);
     }
-    _checkResponse(res){
+
+    _checkResponse(res) {
         if (res && res.ok) {
             return res.json();
         }
         return Promise.reject(`Ошибка: ${res.status}`);
     }
-    _rejectPromise(){
+
+    _rejectPromise() {
         return Promise.reject(`Ошибка`);
     }
 
     _get(ep) {
         return fetch(this._baseUrl + ep, {
             headers: this._headers
+        }).then(this._checkResponse).catch(this._rejectPromise);
+    }
+
+    _getWithJwt(ep, jwt) {
+        return fetch(this._baseUrl + ep, {
+            headers: {...this._headers, "Authorization": `Bearer ${jwt}`}
         }).then(this._checkResponse).catch(this._rejectPromise);
     }
 
@@ -78,7 +89,7 @@ class Api {
     }
 
     deleteCard(cardId) {
-        return this._delete(CARDS_EP+ `/${cardId}`, cardId);
+        return this._delete(CARDS_EP + `/${cardId}`, cardId);
     }
 
     putCardLikes(cardId) {
@@ -88,11 +99,31 @@ class Api {
     deleteCardLikes(cardId) {
         return this._delete(`${CARDS_EP}/${cardId}/likes`, cardId);
     }
+
+    postSignUp(data) {
+        return this._post(SIGN_UP_EP, data);
+    }
+
+    postSignIn(data) {
+        return this._post(SIGN_IN_EP, data);
+    }
+
+    getMe(jwt) {
+        return this._getWithJwt('users/me', jwt);
+    }
 }
+
 const api = new Api({
     baseUrl: 'https://mesto.nomoreparties.co/v1/cohort-46',
     headers: {
         authorization: 'c330429b-3b89-464c-a07c-3bb6ae16281d',
+        'Content-Type': 'application/json'
+    }
+});
+export const auth = new Api({
+    baseUrl: 'https://auth.nomoreparties.co/',
+    headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json'
     }
 });

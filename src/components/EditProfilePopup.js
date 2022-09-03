@@ -1,34 +1,43 @@
 import {useState, useContext, useEffect, memo} from "react";
 import PopupWithForm from "./PopupWithForm";
+import {getMessage} from "../utils/utils";
 import CurrentUserContext from "../contexts/CurrentUserContext";
 
 const EditProfilePopup = memo(({isOpen, onClose, onUpdateUser}) => {
     const currentUser = useContext(CurrentUserContext);
-    const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
+    const defaultState = {name: "", about: ""};
+    const [errors, setErrors] = useState({});
+    const [values, setValues] = useState(defaultState);
     useEffect(() => {
-        setName(currentUser.name || '');
-        setDescription(currentUser.about || '');
+        setValues({
+            name: currentUser.name || '',
+            about: currentUser.about || ''
+        });
     }, [currentUser, isOpen]);
 
     function handleSubmit(e) {
         e.preventDefault();
         onUpdateUser({
-            name,
-            about: description,
+            name: values.name,
+            about: values.about,
         });
     }
 
+    const handleChange = e => {
+        setValues({...values, [e.target.name]: e.target.value});
+        setErrors({...errors, [e.target.name]: getMessage(e)});
+    };
+
     return (
         <PopupWithForm name='profile' title='Редактировать профиль' isOpen={isOpen}
-                       onClose={onClose} onSubmit={handleSubmit}>
+                       onClose={onClose} onSubmit={handleSubmit} errors={errors}>
             <input className="input form__name" id="name" name="name" type="text" required minLength="2"
-                   maxLength="40" placeholder="Имя" value={name} onChange={e => setName(e.target.value)}/>
-            <span className="form__error" id="name-error"> </span>
+                   maxLength="40" placeholder="Имя" value={values.name} onChange={handleChange}/>
+            <span className="form__error" id="name-error">{errors.name}</span>
             <input className="input form__description" id="about" name="about" type="text" required
-                   minLength="2" maxLength="200" placeholder="Профессия" value={description}
-                   onChange={e => setDescription(e.target.value)}/>
-            <span className="form__error" id="about-error"> </span>
+                   minLength="2" maxLength="200" placeholder="Профессия" value={values.about}
+                   onChange={handleChange}/>
+            <span className="form__error" id="about-error">{errors.about}</span>
         </PopupWithForm>
     );
 });
